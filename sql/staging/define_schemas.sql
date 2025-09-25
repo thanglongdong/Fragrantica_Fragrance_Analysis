@@ -3,7 +3,7 @@
 -- Create brand table
 CREATE TABLE brand (
     brand_id INT PRIMARY KEY,
-    brand_name VARCHAR(255) NOT NULL,
+    brand_name VARCHAR(255) UNIQUE NOT NULL,
     country VARCHAR(255)
 )
 
@@ -22,7 +22,7 @@ CREATE TABLE fragrance_list (
 -- Create notes table and junction table for many-to-many relationship
 CREATE TABLE note (
     note_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    note_name VARCHAR(255) NOT NULL
+    note_name VARCHAR(255) UNIQUE NOT NULL
 )
 
 CREATE TABLE fragrance_note (
@@ -33,7 +33,7 @@ CREATE TABLE fragrance_note (
 -- Create perfumer table and junction table for many-to-many relationship
 CREATE TABLE perfumer (
     perfumer_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    perfumer_name VARCHAR(555) NOT NULL
+    perfumer_name VARCHAR(555) UNIQuE NOT NULL
 )
 
 CREATE TABLE fragrance_perfumer (
@@ -49,7 +49,7 @@ CREATE TABLE accord (
 
 CREATE TABLE fragrance_accord (
     fragrance_id INT REFERENCES fragrance_list(fragrance_id),
-    accord_name VARCHAR(255) NOT NULL
+    accord_name VARCHAR(255) UNIQUE NOT NULL
 )
 
 -- Verify the tables have been created
