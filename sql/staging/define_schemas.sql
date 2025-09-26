@@ -26,10 +26,13 @@ CREATE TABLE note (
 )
 
 CREATE TABLE fragrance_note (
+    fragrance_note_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     fragrance_id INT REFERENCES fragrance_list(fragrance_id),
     note_id INT REFERENCES note(note_id),
-    note_type VARCHAR(50)
+    note_type VARCHAR(50) CHECK (note_type IN ('top', 'middle', 'base')),
+    UNIQUE (fragrance_id, note_id, note_type)
 )
+
 -- Create perfumer table and junction table for many-to-many relationship
 CREATE TABLE perfumer (
     perfumer_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -37,8 +40,10 @@ CREATE TABLE perfumer (
 )
 
 CREATE TABLE fragrance_perfumer (
+    fragrance_perfumer_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     fragrance_id INT REFERENCES fragrance_list(fragrance_id),
-    perfumer_id INT REFERENCES perfumer(perfumer_id)
+    perfumer_id INT REFERENCES perfumer(perfumer_id),
+    UNIQUE (fragrance_id, perfumer_id)
 )
 
 -- Create accord table and junction table for many-to-many relationship
@@ -48,8 +53,10 @@ CREATE TABLE accord (
 )
 
 CREATE TABLE fragrance_accord (
+    fragrance_accord_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     fragrance_id INT REFERENCES fragrance_list(fragrance_id),
-    accord_name VARCHAR(255) UNIQUE NOT NULL
+    accord_id INT REFERENCES accord(accord_id),
+    UNIQUE (fragrance_id, accord_id)
 )
 
 -- Verify the tables have been created
