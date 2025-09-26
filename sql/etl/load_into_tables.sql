@@ -12,6 +12,7 @@ FROM staging_brand sb;
 SELECT * FROM brand
 ORDER BY brand_id;
 
+
 -- Load data into accord table from staging_fragrance_core table
 -- Preview data load by selecting distinct accord names from staging_fragrance_core
 SELECT DISTINCT TRIM(a) AS accord_name
@@ -31,3 +32,38 @@ WHERE a IS NOT NULL AND a <> '';
 -- Verify data load by retrieving all rows from accord table, ordered by accord_id
 SELECT * FROM accord
 ORDER BY accord_id;
+
+
+-- Load data into accord table from staging_fragrance_core table
+-- Preview data load by selecting distinct note names from staging_fragrance_core
+SELECT DISTINCT TRIM(UNNEST(string_to_array(top_notes, ','))) AS note_name      -- split by comma and unnest into rows
+FROM staging_fragrance_core
+WHERE top_notes IS NOT NULL;
+
+SELECT DISTINCT TRIM(UNNEST(string_to_array(middle_notes, ','))) AS note_name
+FROM staging_fragrance_core
+WHERE middle_notes IS NOT NULL;
+
+SELECT DISTINCT TRIM(UNNEST(string_to_array(base_notes, ','))) AS note_name
+FROM staging_fragrance_core
+WHERE base_notes IS NOT NULL;
+
+-- Insert into note table, ensure that there's no duplicates and TRIM to clean up whitespace
+INSERT INTO note (note_name)
+SELECT DISTINCT TRIM(n)
+FROM staging_fragrance_core s
+CROSS JOIN LATERAL UNNEST(string_to_array(s.top_notes, ',')) AS n       -- Use CROSS JOIN LATERAL to handle each row
+WHERE n IS NOT NULL AND n <> ''
+UNION
+SELECT DISTINCT TRIM(n)
+FROM staging_fragrance_core s
+CROSS JOIN LATERAL UNNEST(string_to_array(s.middle_notes, ',')) AS n
+WHERE n IS NOT NULL AND n <> ''
+UNION
+SELECT DISTINCT TRIM(n)
+FROM staging_fragrance_core s
+CROSS JOIN LATERAL UNNEST(string_to_array(s.base_notes, ',')) AS n
+WHERE n IS NOT NULL AND n <> '';
+
+-- Verify data load by retrieving all rows from note table, ordered by note_id
+SELECT * FROM note LIMIT 10;
