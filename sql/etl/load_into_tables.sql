@@ -65,5 +65,55 @@ FROM staging_fragrance_core s
 CROSS JOIN LATERAL UNNEST(string_to_array(s.base_notes, ',')) AS n
 WHERE n IS NOT NULL AND n <> '';
 
--- Verify data load by retrieving all rows from note table, ordered by note_id
+-- Verify data load by retrieving rows from note table
 SELECT * FROM note LIMIT 10;
+
+
+-- Load data into perfumer table from staging_fragrance_core table
+-- Preview data load by selecting distinct note names from staging_fragrance_core
+SELECT DISTINCT INITCAP(TRIM(perfumer_1)) -- Capitalize first letter of each word and TRIM to clean up whitespace
+INSERT INTO perfumer(perfumer_name)
+FROM staging_fragrance_core 
+WHERE perfumer_1 IS NOT NULL AND perfumer_1 <> ''
+
+SELECT DISTINCT INITCAP(TRIM(perfumer_2)) 
+FROM staging_fragrance_core 
+WHERE perfumer_2 IS NOT NULL AND perfumer_2 <> ''
+
+-- Insert into note table, ensure that there's no duplicates
+SELECT DISTINCT INITCAP(TRIM(perfumer_1)) 
+FROM staging_fragrance_core 
+WHERE perfumer_1 IS NOT NULL AND perfumer_1 <> ''
+ON CONFLICT DO NOTHING; -- Ignore errors due to duplicates
+
+INSERT INTO perfumer(perfumer_name)
+SELECT DISTINCT INITCAP(TRIM(perfumer_2)) 
+FROM staging_fragrance_core 
+WHERE perfumer_2 IS NOT NULL AND perfumer_2 <> ''
+ON CONFLICT DO NOTHING;
+
+-- Verify data load by retrieving rows from perfumer table
+SELECT * FROM perfumer LIMIT 10;
+
+
+-- Load data into fragrance_list table from staging_fragrance_core table
+-- Preview data load and structure by selecting relevant columns from staging_fragrance_core
+SELECT fragrance_name, gender, rating_count, rating_value, year, url 
+FROM staging_fragrance_core 
+ORDER BY fragrance_name
+LIMIT 10;
+
+-- Insert into fragrance_list table, ensuring data types match the target schema
+INSERT INTO fragrance_list (fragrance_name, brand_id, gender, rating_value, rating_count, year, url)
+SELECT 
+    s.fragrance_name,
+    brand_id,
+    s.gender,
+    s.rating_value::NUMERIC(3,2), -- Cast to match target schema data types
+    s.rating_count::INT,
+    s.year::INT,
+    s.url
+FROM staging_fragrance_core s JOIN brand b ON TRIM(s.brand_name) = b.brand_name; -- Join with brand table to get matching brand_id
+
+-- Verify data load by retrieving rows from fragrance_list table
+SELECT * FROM fragrance_list LIMIT 10;
