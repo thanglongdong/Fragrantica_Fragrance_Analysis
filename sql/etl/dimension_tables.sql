@@ -36,7 +36,7 @@ SELECT * FROM accord
 ORDER BY accord_id;
 
 
--- Load data into accord table from staging_fragrance_core table
+-- Load data into note table from staging_fragrance_core table
 -- Preview data load by selecting distinct note names from staging_fragrance_core
 SELECT DISTINCT TRIM(UNNEST(string_to_array(top_notes, ','))) AS note_name      -- split by comma and unnest into rows
 FROM staging_fragrance_core
