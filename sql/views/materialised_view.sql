@@ -25,3 +25,10 @@ GROUP BY f.fragrance_id, b.brand_name, b.country;
 
 -- Verify the materialized view by retrieving some rows
 SELECT * FROM mv_fragrance_analysis LIMIT 10;
+
+-- Create a standard view to simplify querying the materialized view (for BI tools use)
+CREATE OR REPLACE VIEW vw_fragrance_analysis AS
+SELECT * FROM mv_fragrance_analysis;
+
+-- Verify the standard view by retrieving some rows
+SELECT * FROM vw_fragrance_analysis LIMIT 10;
