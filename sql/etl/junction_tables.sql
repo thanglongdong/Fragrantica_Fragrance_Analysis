@@ -1,6 +1,6 @@
 -- JUNCTION TABLE ETL
 
--- Load data into fragrance_accord junction table from staging_brand table
+-- 1. Load data into fragrance_accord junction table from staging_brand table
 WITH accord_combined AS (   -- Combine all accord columns into a single column with fragrance_id
     SELECT 
         f.fragrance_id,
@@ -43,7 +43,7 @@ ON CONFLICT DO NOTHING;     -- Ignore error caused by removing duplicates
 SELECT * FROM fragrance_accord LIMIT 10;
 
 
--- Load data into fragrance_note junction table from staging_brand table
+-- 2. Load data into fragrance_note junction table from staging_brand table
 SELECT
     f.fragrance_id,
     s.top_notes
@@ -80,4 +80,27 @@ ON CONFLICT DO NOTHING;     -- Ignore error caused by removing duplicates
 SELECT * FROM fragrance_note ORDER BY fragrance_id LIMIT 10;
 
 
--- Load data into fragrance_perfumer junction table from staging_brand table
+-- 3. Load data into fragrance_perfumer junction table from staging_brand table
+-- Insert into fragrance_perfumer junction table by joining tables to retrieve fragrance_id and perfumer_id
+INSERT INTO fragrance_perfumer (fragrance_id, perfumer_id)
+SELECT 
+    f.fragrance_id,
+    p.perfumer_id
+FROM staging_fragrance_core s 
+JOIN fragrance_list f ON TRIM(LOWER(f.fragrance_name)) = TRIM(LOWER(s.fragrance_name))      -- Join on fragrance_name to get fragrance_id
+JOIN perfumer p ON TRIM(LOWER(s.perfumer_1)) = TRIM(LOWER(p.perfumer_name))     -- Join on perfumer_1 to get perfumer_id
+WHERE s.perfumer_1 IS NOT NULL AND s.perfumer_1 <> '' AND p.perfumer_name IS NOT NULL       -- Exclude null or empty perfumer names
+ON CONFLICT DO NOTHING;     -- Ignore error caused by removing duplicates
+
+INSERT INTO fragrance_perfumer (fragrance_id, perfumer_id)
+SELECT 
+    f.fragrance_id,
+    p.perfumer_id
+FROM staging_fragrance_core s 
+JOIN fragrance_list f ON TRIM(LOWER(f.fragrance_name)) = TRIM(LOWER(s.fragrance_name))
+JOIN perfumer p ON TRIM(LOWER(s.perfumer_2)) = TRIM(LOWER(p.perfumer_name))
+WHERE s.perfumer_2 IS NOT NULL AND s.perfumer_2 <> '' AND p.perfumer_name IS NOT NULL
+ON CONFLICT DO NOTHING;
+
+-- Verify data load by retrieving rows from fragrance_perfumer junction table
+SELECT * FROM fragrance_perfumer LIMIT 10;
